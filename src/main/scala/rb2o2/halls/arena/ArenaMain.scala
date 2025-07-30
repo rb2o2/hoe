@@ -42,7 +42,8 @@ object ArenaMain {
       def createCharacterLoop(): ListBuffer[Char] = ListBuffer()
 
       val selectableChars = ListBuffer[Char]()
-      println("\nSelect characters from Roster [1]-[4] or [C]reate new character. [R] when drafted all combatants.\n[Q] to quit to main menu")
+      println("\nSelect characters from Roster [1]-[4] or [C]reate new character. " +
+        "[R] when drafted all combatants.\n[Q] to quit to main menu")
       println("Selected: " + selected.map(_.name).mkString(", "))
       println("Roster:\n------\n")
       var command = ""
