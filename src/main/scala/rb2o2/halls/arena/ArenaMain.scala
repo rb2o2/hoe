@@ -5,10 +5,11 @@ import scala.collection.mutable.ListBuffer
 import scala.io.StdIn
 
 object ArenaMain {
-  val characters: ListBuffer[Char] = ListBuffer()
+  private val characters: ListBuffer[Char] = ListBuffer()
   Characters.initCharacters(characters)
+
   def main(args: Array[String]): Unit = {
-    println("Welcome to iter0!")
+    println("Welcome to HoE Arena iter0!")
     var command: String = ""
     while {
       command = menuLoop()
@@ -21,7 +22,7 @@ object ArenaMain {
     println("Thanks for playing! Bye!")
   }
 
-  def menuLoop(): String = {
+  private def menuLoop(): String = {
     println()
     println("Main menu:\n---------")
     println("[N]ew game")
@@ -29,15 +30,17 @@ object ArenaMain {
     scala.io.StdIn.readLine().strip()
   }
 
-  def newGameLoop(): Unit = {
+  private def newGameLoop(): Unit = {
     val selectedChars = ListBuffer[Char]()
 
     def startBattle(characters: ListBuffer[Char]): String = {
       "q"
     }
+
     @tailrec
     def selectCharLoop(selected: ListBuffer[Char]): String = {
       def createCharacterLoop(): ListBuffer[Char] = ListBuffer()
+
       val selectableChars = ListBuffer[Char]()
       println("\nSelect characters from Roster [1]-[4] or [C]reate new character. [R] when drafted all combatants.\n[Q] to quit to main menu")
       println("Selected: " + selected.map(_.name).mkString(", "))
@@ -66,8 +69,5 @@ object ArenaMain {
       command = selectCharLoop(selectedChars)
       command != "q"
     } do ()
-
-
   }
-
 }
