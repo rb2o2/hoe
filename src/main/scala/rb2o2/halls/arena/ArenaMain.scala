@@ -1,8 +1,13 @@
 package rb2o2.halls.arena
 
+import rb2o2.halls.arena.Maneuver.{Attack, DoNothing}
+import rb2o2.halls.arena.RollResult.CriticalSuccess
+
 import scala.annotation.tailrec
+import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.io.StdIn
+import scala.util.{Success, Try, Failure as Fail}
 
 object ArenaMain {
   private val characters: ListBuffer[Char] = ListBuffer()
@@ -34,6 +39,95 @@ object ArenaMain {
     val selectedChars = ListBuffer[Char]()
 
     def startBattle(characters: ListBuffer[Char]): String = {
+      def applyManeuver(char: Char, man: (Maneuver, Option[Char])): Unit = {
+        println(s"${char.name} executes ${man._1.toString} ${man._2.map("over "+ _.name)}")
+        val maneuver = man._1
+        char.currentManeuver = maneuver
+        maneuver match
+          case DoNothing =>
+          case Attack =>
+            println("choose target")
+            val it = Iterator.from(1)
+            for {targets <- characters.filterNot(_ == char)
+                 n = it.next()} {
+              println(s"$n -- ${targets.name}")
+            }
+            var cmd = Try(StdIn.readLine().toInt)
+            while ( cmd match
+              case Fail(_) => true
+              case Success(a: Int) if a > characters.size - 1 || a < 1 => true
+              case _ => false) {
+              println("wrong number")
+              cmd = Try(StdIn.readLine().toInt)
+            }
+
+            val target = characters.filterNot(_ == char)(cmd.get-1)
+            println("choose weapon")
+            val it2 = Iterator.from(1)
+            for {w <- char.weapons
+                 n = it2.next()} {
+              println(s"$n ) ${w.name} -- ${w.skill}")
+            }
+            cmd = Try(StdIn.readLine().toInt)
+            while (cmd match {
+              case Fail(_) => true
+              case Success(a: Int) if a < 1 || a> char.weapons.size => true
+              case _ => false
+            }) {
+              println("wrong number")
+              cmd = Try(StdIn.readLine().toInt)
+            }
+            val weapon = char.weapons(cmd.get - 1)
+            //Roll atk
+            //
+
+            val atk = Rolls.successRoll(char.dx + weapon.skill.relativeLevel)
+            println(s"attacking ${target.name}! roll is : ${atk._1.toString}")
+            atk match {
+              case (RollResult.Success, _) =>
+                Rolls.successRoll(target.dodge) match
+                  case (RollResult.Success, _) => println("enemy evades your blow")
+                  case (RollResult.CriticalSuccess,_) => println("enemy evades your blow")
+                  case (RollResult.Failure,_)| (RollResult.CriticalFailure, _) =>
+                    println("You hit!")
+                    val dmg = Rolls.damageRoll((char.damageSw._1, char.damageSw._2 + weapon.swMod.getOrElse(0)))
+                    target.hp -= (dmg - target.dr)
+                    println(s"you deal ${dmg - target.dr} damage")
+              case (RollResult.CriticalSuccess, _) =>
+                println("You critically hit!")
+                val dmg = Rolls.damageRoll((char.damageSw._1, char.damageSw._2 + weapon.swMod.getOrElse(0)))
+                target.hp -= (dmg - target.dr)
+                println(s"you deal ${dmg - target.dr} damage")
+              case (RollResult.Failure, _) => println("You miss!")
+              case (RollResult.CriticalFailure, _) => println("You critically miss!")
+            }
+          case _ => println("not implemented")
+      }
+      @tailrec
+      def chooseManeuver(character: Char): (Maneuver, Option[Char]) = {
+        println(s"It's ${character.name}'s turn. Choose maneuver'")
+        val mm = new mutable.HashMap[String, Maneuver]()
+        val it = Iterator.from(1)
+        for {m <- Maneuver.values} {
+          val n = it.next()
+          mm.put(n.toString, m)
+          println(s"$n -- ${m.toString}")
+        }
+        val com = StdIn.readLine()
+        Try(com.toInt) match
+          case Success(a: Int) if a <=Maneuver.values.length && a > 0 => (mm(a.toString), None)
+          case _ =>
+            println("Error choosing maneuver. Try again")
+            chooseManeuver(character)
+      }
+      val whosTurn = LazyList.from(0).flatten(_ => characters).iterator
+      while (characters.count(_.hp>0) > 1) {
+        var character = whosTurn.next()
+        while (character.hp <= 0) character = whosTurn.next()
+        val maneuver = chooseManeuver(character)
+        applyManeuver(character, maneuver)
+      }
+      println(s"The winner is ${characters.filter(_.hp>0).head.name}")
       "q"
     }
 
@@ -62,6 +156,7 @@ object ArenaMain {
         case "3" => selectCharLoop(selected :+ characters(2))
         case "4" => selectCharLoop(selected :+ characters(3))
         case "c" => selectCharLoop(selected :++ createCharacterLoop())
+        case _ => "q"
       }
     }
 

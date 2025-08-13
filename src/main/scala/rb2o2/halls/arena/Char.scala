@@ -38,6 +38,7 @@ case class Char(name: String,
                 weapons: List[Weapon],
                 spells: List[Spell]
                ) {
+  def dodge: Int = Math.floor(bs).toInt + 3
   var shockPenalty: Int = 0
   var stunned: Boolean = false
   var surprised: Boolean = false
