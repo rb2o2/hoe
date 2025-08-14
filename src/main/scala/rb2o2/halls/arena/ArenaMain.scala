@@ -104,7 +104,7 @@ object ArenaMain {
                characters: ListBuffer[Char]): Unit = {
       val target = chooseAttackTarget(char, characters)
       val weapon = chooseAttackWeapon(char)
-      for {i <- 1.to(if (man._1 == Maneuver.AllOutAttackDouble) 2 else 1)} {
+      for {_ <- 1.to(if (man._1 == Maneuver.AllOutAttackDouble) 2 else 1)} {
         val atk = Rolls.successRoll(char.dx + weapon.skill.relativeLevel +
           (if (man._1 == Maneuver.AllOutAttackDetermined) 4 else 0))
         println(s"attacking ${target.name}! roll is : ${atk._1.toString}")
@@ -174,10 +174,10 @@ object ArenaMain {
             chooseManeuver(character)
       }
 
-      val whosTurn = LazyList.from(0).flatten(_ => characters).iterator
+      val whoTurn = LazyList.from(0).flatten(_ => characters).iterator
       while (characters.count(_.hp > 0) > 1) {
-        var character = whosTurn.next()
-        while (character.hp <= 0) character = whosTurn.next()
+        var character = whoTurn.next()
+        while (character.hp <= 0) character = whoTurn.next()
         val maneuver = chooseManeuver(character)
         applyManeuver(character, maneuver)
       }
@@ -190,7 +190,7 @@ object ArenaMain {
       def createCharacterLoop(): ListBuffer[Char] = ListBuffer()
 
       val selectableChars = ListBuffer[Char]()
-      println("\nSelect characters from Roster [1]-[4] or [C]reate new character. " +
+      println("\nSelect characters from Roster [1]-[4] or [C] to create new character. " +
         "[R] when drafted all combatants.\n[Q] to quit to main menu")
       println("Selected: " + selected.map(_.name).mkString(", "))
       println("Roster:\n------\n")
@@ -205,7 +205,7 @@ object ArenaMain {
       command.toLowerCase() match {
         case "r" => startBattle(selected)
         case "q" => "q"
-        case "1" => selectCharLoop(selected :+ characters(0))
+        case "1" => selectCharLoop(selected :+ characters.head)
         case "2" => selectCharLoop(selected :+ characters(1))
         case "3" => selectCharLoop(selected :+ characters(2))
         case "4" => selectCharLoop(selected :+ characters(3))
