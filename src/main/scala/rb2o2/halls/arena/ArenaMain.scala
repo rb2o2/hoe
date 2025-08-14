@@ -37,6 +37,65 @@ object ArenaMain {
 
   private def newGameLoop(): Unit = {
     val selectedChars = ListBuffer[Char]()
+    def attack(char: Char,
+               man: (Maneuver, Option[Char]),
+               characters: ListBuffer[Char]): Unit = {
+      println("choose target")
+      val it = Iterator.from(1)
+      for {targets <- characters.filterNot(_ == char)
+           n = it.next()} {
+        println(s"$n -- ${targets.name}")
+      }
+      var cmd = Try(StdIn.readLine().toInt)
+      while (cmd match
+        case Fail(_) => true
+        case Success(a: Int) if a > characters.size - 1 || a < 1 => true
+        case _ => false) {
+        println("wrong number")
+        cmd = Try(StdIn.readLine().toInt)
+      }
+
+      val target = characters.filterNot(_ == char)(cmd.get - 1)
+      println("choose weapon")
+      val it2 = Iterator.from(1)
+      for {w <- char.weapons
+           n = it2.next()} {
+        println(s"$n ) ${w.name} -- ${w.skill}")
+      }
+      cmd = Try(StdIn.readLine().toInt)
+      while (cmd match {
+        case Fail(_) => true
+        case Success(a: Int) if a < 1 || a > char.weapons.size => true
+        case _ => false
+      }) {
+        println("wrong number")
+        cmd = Try(StdIn.readLine().toInt)
+      }
+      val weapon = char.weapons(cmd.get - 1)
+      //Roll atk
+      //
+
+      val atk = Rolls.successRoll(char.dx + weapon.skill.relativeLevel)
+      println(s"attacking ${target.name}! roll is : ${atk._1.toString}")
+      atk match {
+        case (RollResult.Success, _) =>
+          Rolls.successRoll(target.dodge) match
+            case (RollResult.Success, _) => println("enemy evades your blow")
+            case (RollResult.CriticalSuccess, _) => println("enemy evades your blow")
+            case (RollResult.Failure, _) | (RollResult.CriticalFailure, _) =>
+              println("You hit!")
+              val dmg = Rolls.damageRoll((char.damageSw._1, char.damageSw._2 + weapon.swMod.getOrElse(0)))
+              target.hp -= (dmg - target.dr)
+              println(s"you deal ${dmg - target.dr} damage")
+        case (RollResult.CriticalSuccess, _) =>
+          println("You critically hit!")
+          val dmg = Rolls.damageRoll((char.damageSw._1, char.damageSw._2 + weapon.swMod.getOrElse(0)))
+          target.hp -= (dmg - target.dr)
+          println(s"you deal ${dmg - target.dr} damage")
+        case (RollResult.Failure, _) => println("You miss!")
+        case (RollResult.CriticalFailure, _) => println("You critically miss!")
+      }
+    }
 
     def startBattle(characters: ListBuffer[Char]): String = {
       def applyManeuver(char: Char, man: (Maneuver, Option[Char])): Unit = {
@@ -46,61 +105,7 @@ object ArenaMain {
         maneuver match
           case DoNothing =>
           case Attack =>
-            println("choose target")
-            val it = Iterator.from(1)
-            for {targets <- characters.filterNot(_ == char)
-                 n = it.next()} {
-              println(s"$n -- ${targets.name}")
-            }
-            var cmd = Try(StdIn.readLine().toInt)
-            while ( cmd match
-              case Fail(_) => true
-              case Success(a: Int) if a > characters.size - 1 || a < 1 => true
-              case _ => false) {
-              println("wrong number")
-              cmd = Try(StdIn.readLine().toInt)
-            }
-
-            val target = characters.filterNot(_ == char)(cmd.get-1)
-            println("choose weapon")
-            val it2 = Iterator.from(1)
-            for {w <- char.weapons
-                 n = it2.next()} {
-              println(s"$n ) ${w.name} -- ${w.skill}")
-            }
-            cmd = Try(StdIn.readLine().toInt)
-            while (cmd match {
-              case Fail(_) => true
-              case Success(a: Int) if a < 1 || a> char.weapons.size => true
-              case _ => false
-            }) {
-              println("wrong number")
-              cmd = Try(StdIn.readLine().toInt)
-            }
-            val weapon = char.weapons(cmd.get - 1)
-            //Roll atk
-            //
-
-            val atk = Rolls.successRoll(char.dx + weapon.skill.relativeLevel)
-            println(s"attacking ${target.name}! roll is : ${atk._1.toString}")
-            atk match {
-              case (RollResult.Success, _) =>
-                Rolls.successRoll(target.dodge) match
-                  case (RollResult.Success, _) => println("enemy evades your blow")
-                  case (RollResult.CriticalSuccess,_) => println("enemy evades your blow")
-                  case (RollResult.Failure,_)| (RollResult.CriticalFailure, _) =>
-                    println("You hit!")
-                    val dmg = Rolls.damageRoll((char.damageSw._1, char.damageSw._2 + weapon.swMod.getOrElse(0)))
-                    target.hp -= (dmg - target.dr)
-                    println(s"you deal ${dmg - target.dr} damage")
-              case (RollResult.CriticalSuccess, _) =>
-                println("You critically hit!")
-                val dmg = Rolls.damageRoll((char.damageSw._1, char.damageSw._2 + weapon.swMod.getOrElse(0)))
-                target.hp -= (dmg - target.dr)
-                println(s"you deal ${dmg - target.dr} damage")
-              case (RollResult.Failure, _) => println("You miss!")
-              case (RollResult.CriticalFailure, _) => println("You critically miss!")
-            }
+            attack(char, man, characters)
           case _ => println("not implemented")
       }
       @tailrec
