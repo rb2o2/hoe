@@ -1,6 +1,7 @@
 package rb2o2.halls.arena
 
-import rb2o2.halls.arena.Maneuver.{Attack, DoNothing}
+import rb2o2.halls.arena.DamageType.{Cutting, Impaling}
+import rb2o2.halls.arena.Maneuver.{AllOutAttackDetermined, AllOutAttackDouble, AllOutAttackStrong, Attack, DoNothing}
 import rb2o2.halls.arena.RollResult.CriticalSuccess
 
 import scala.annotation.tailrec
@@ -37,9 +38,8 @@ object ArenaMain {
 
   private def newGameLoop(): Unit = {
     val selectedChars = ListBuffer[Char]()
-    def attack(char: Char,
-               man: (Maneuver, Option[Char]),
-               characters: ListBuffer[Char]): Unit = {
+
+    def chooseAttackTarget(char: Char, characters: ListBuffer[Char]): Char = {
       println("choose target")
       val it = Iterator.from(1)
       for {targets <- characters.filterNot(_ == char)
@@ -54,15 +54,17 @@ object ArenaMain {
         println("wrong number")
         cmd = Try(StdIn.readLine().toInt)
       }
+      characters.filterNot(_ == char)(cmd.get - 1)
+    }
 
-      val target = characters.filterNot(_ == char)(cmd.get - 1)
+    def chooseAttackWeapon(char: Char): Weapon = {
       println("choose weapon")
       val it2 = Iterator.from(1)
       for {w <- char.weapons
            n = it2.next()} {
         println(s"$n ) ${w.name} -- ${w.skill}")
       }
-      cmd = Try(StdIn.readLine().toInt)
+      var cmd = Try(StdIn.readLine().toInt)
       while (cmd match {
         case Fail(_) => true
         case Success(a: Int) if a < 1 || a > char.weapons.size => true
@@ -71,46 +73,92 @@ object ArenaMain {
         println("wrong number")
         cmd = Try(StdIn.readLine().toInt)
       }
-      val weapon = char.weapons(cmd.get - 1)
-      //Roll atk
-      //
+      char.weapons(cmd.get - 1)
+    }
 
-      val atk = Rolls.successRoll(char.dx + weapon.skill.relativeLevel)
-      println(s"attacking ${target.name}! roll is : ${atk._1.toString}")
-      atk match {
-        case (RollResult.Success, _) =>
-          Rolls.successRoll(target.dodge) match
-            case (RollResult.Success, _) => println("enemy evades your blow")
-            case (RollResult.CriticalSuccess, _) => println("enemy evades your blow")
-            case (RollResult.Failure, _) | (RollResult.CriticalFailure, _) =>
-              println("You hit!")
-              val dmg = Rolls.damageRoll((char.damageSw._1, char.damageSw._2 + weapon.swMod.getOrElse(0)))
-              target.hp -= (dmg - target.dr)
-              println(s"you deal ${dmg - target.dr} damage")
-        case (RollResult.CriticalSuccess, _) =>
-          println("You critically hit!")
-          val dmg = Rolls.damageRoll((char.damageSw._1, char.damageSw._2 + weapon.swMod.getOrElse(0)))
-          target.hp -= (dmg - target.dr)
-          println(s"you deal ${dmg - target.dr} damage")
-        case (RollResult.Failure, _) => println("You miss!")
-        case (RollResult.CriticalFailure, _) => println("You critically miss!")
+    def dealDamage(char: Char, target: Char, weapon: Weapon, man: (Maneuver, Option[Char])): Unit = {
+      val dmg = if (man._1 == Maneuver.AllOutAttackStrong) {
+        Rolls.damageRoll((char.damageSw._1, Math.max(
+          char.damageSw._2 + weapon.swMod.getOrElse(0) + 2,
+          char.damageSw._2 + weapon.swMod.getOrElse(0) + char.damageSw._1
+        )))
+      } else {
+        Rolls.damageRoll((char.damageSw._1, char.damageSw._2 + weapon.swMod.getOrElse(0)))
+      }
+      val damageDealt = Math.floor((dmg - target.dr) * (weapon.swDmgType match
+        case Some(Cutting) => 1.5
+        case Some(Impaling) => 2.0
+        case None => weapon.thrDmgType match
+          case Some(Cutting) => 1.5
+          case Some(Impaling) => 2.0
+          case _ => 1.0
+        case _ => 1.0
+        )).toInt
+      target.hp -= damageDealt
+      target.shockPenalty = Math.max(-4, -1 * damageDealt)
+      println(s"you deal $damageDealt damage")
+    }
+
+    def attack(char: Char,
+               man: (Maneuver, Option[Char]),
+               characters: ListBuffer[Char]): Unit = {
+      val target = chooseAttackTarget(char, characters)
+      val weapon = chooseAttackWeapon(char)
+      for {i <- 1.to(if (man._1 == Maneuver.AllOutAttackDouble) 2 else 1)} {
+        val atk = Rolls.successRoll(char.dx + weapon.skill.relativeLevel +
+          (if (man._1 == Maneuver.AllOutAttackDetermined) 4 else 0))
+        println(s"attacking ${target.name}! roll is : ${atk._1.toString}")
+        atk match {
+          case (RollResult.Success, _) =>
+            val ddg = if (target.currentManeuver != Maneuver.AllOutDefenseIncreased) target.dodge
+            else target.dodge + 2
+            if (target.currentManeuver != Maneuver.AllOutAttackDetermined &&
+              target.currentManeuver != Maneuver.AllOutAttackDouble &&
+              target.currentManeuver != Maneuver.AllOutAttackStrong &&
+              target.currentManeuver != Maneuver.AllOutDefenseDouble
+            ) {
+              Rolls.successRoll(ddg) match
+                case (RollResult.Success, _) => println("enemy evades your blow")
+                case (RollResult.CriticalSuccess, _) => println("enemy evades your blow")
+                case (RollResult.Failure, _) | (RollResult.CriticalFailure, _) =>
+                  println("You hit!")
+                  dealDamage(char, target, weapon, man)
+            }
+            else if (target.currentManeuver == Maneuver.AllOutDefenseDouble) {
+              Rolls.bestOfTwo(Rolls.successRoll(ddg), Rolls.successRoll(ddg)) match
+                case RollResult.Success | RollResult.CriticalSuccess =>
+                  println("enemy evades your blow")
+                case RollResult.Failure | RollResult.CriticalFailure =>
+                  println("You hit!")
+                  dealDamage(char, target, weapon, man)
+
+            } else {
+              dealDamage(char, target, weapon, man)
+            }
+          case (RollResult.CriticalSuccess, _) =>
+            println("You critically hit!")
+            dealDamage(char, target, weapon, man)
+          case (RollResult.Failure, _) => println("You miss!")
+          case (RollResult.CriticalFailure, _) => println("You critically miss!")
+        }
       }
     }
 
     def startBattle(characters: ListBuffer[Char]): String = {
       def applyManeuver(char: Char, man: (Maneuver, Option[Char])): Unit = {
-        println(s"${char.name} executes ${man._1.toString} ${man._2.map("over "+ _.name)}")
+        println(s"${char.name} executes ${man._1.toString} ${man._2.map("over " + _.name)}")
         val maneuver = man._1
         char.currentManeuver = maneuver
         maneuver match
           case DoNothing =>
-          case Attack =>
+          case Attack | AllOutAttackStrong | AllOutAttackDetermined | AllOutAttackDouble =>
             attack(char, man, characters)
           case _ => println("not implemented")
       }
+
       @tailrec
       def chooseManeuver(character: Char): (Maneuver, Option[Char]) = {
-        println(s"It's ${character.name}'s turn. Choose maneuver'")
+        println(s"It's ${character.name}'s turn. You are at ${character.shockPenalty} due to shock. Choose maneuver'")
         val mm = new mutable.HashMap[String, Maneuver]()
         val it = Iterator.from(1)
         for {m <- Maneuver.values} {
@@ -120,19 +168,20 @@ object ArenaMain {
         }
         val com = StdIn.readLine()
         Try(com.toInt) match
-          case Success(a: Int) if a <=Maneuver.values.length && a > 0 => (mm(a.toString), None)
+          case Success(a: Int) if a <= Maneuver.values.length && a > 0 => (mm(a.toString), None)
           case _ =>
             println("Error choosing maneuver. Try again")
             chooseManeuver(character)
       }
+
       val whosTurn = LazyList.from(0).flatten(_ => characters).iterator
-      while (characters.count(_.hp>0) > 1) {
+      while (characters.count(_.hp > 0) > 1) {
         var character = whosTurn.next()
         while (character.hp <= 0) character = whosTurn.next()
         val maneuver = chooseManeuver(character)
         applyManeuver(character, maneuver)
       }
-      println(s"The winner is ${characters.filter(_.hp>0).head.name}")
+      println(s"The winner is ${characters.filter(_.hp > 0).head.name}")
       "q"
     }
 

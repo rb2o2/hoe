@@ -27,6 +27,18 @@ object Rolls {
     (res, margin)
   }
 
+  def bestOfTwo(first: (RollResult, Int), second: (RollResult, Int)): RollResult = {
+    if (first._1 == Success) {
+      if (second._1 == CriticalSuccess) CriticalSuccess
+      else Success
+    } else if (first._1 == CriticalSuccess) CriticalSuccess
+    else if (first._1 == Failure) {
+      if (second._1 == CriticalSuccess) CriticalSuccess
+      else if (second._1 == Success) Success
+      else Failure
+    } else second._1
+  }
+
   def damageRoll(diceMod: (Int, Int)): Int = {
     var sum = 0
     for {d <- 1.to(diceMod._1)} {
