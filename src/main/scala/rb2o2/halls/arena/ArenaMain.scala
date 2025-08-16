@@ -1,7 +1,7 @@
 package rb2o2.halls.arena
 
 import rb2o2.halls.arena.DamageType.{Cutting, Impaling}
-import rb2o2.halls.arena.Maneuver.{AllOutAttackDetermined, AllOutAttackDouble, AllOutAttackStrong, Attack, DoNothing}
+import rb2o2.halls.arena.Maneuver.*
 import rb2o2.halls.arena.RollResult.CriticalSuccess
 
 import scala.annotation.tailrec
@@ -77,7 +77,7 @@ object ArenaMain {
     }
 
     def dealDamage(char: Char, target: Char, weapon: Weapon, man: (Maneuver, Option[Char])): Unit = {
-      val dmg = if (man._1 == Maneuver.AllOutAttackStrong) {
+      val dmg = if (man._1 == AllOutAttackStrong) {
         Rolls.damageRoll((char.damageSw._1, Math.max(
           char.damageSw._2 + weapon.swMod.getOrElse(0) + 2,
           char.damageSw._2 + weapon.swMod.getOrElse(0) + char.damageSw._1
@@ -104,18 +104,18 @@ object ArenaMain {
                characters: ListBuffer[Char]): Unit = {
       val target = chooseAttackTarget(char, characters)
       val weapon = chooseAttackWeapon(char)
-      for {_ <- 1.to(if (man._1 == Maneuver.AllOutAttackDouble) 2 else 1)} {
+      for {_ <- 1.to(if (man._1 == AllOutAttackDouble) 2 else 1)} {
         val atk = Rolls.successRoll(char.dx + weapon.skill.relativeLevel +
-          (if (man._1 == Maneuver.AllOutAttackDetermined) 4 else 0))
+          (if (man._1 == AllOutAttackDetermined) 4 else 0))
         println(s"attacking ${target.name}! roll is : ${atk._1.toString}")
         atk match {
           case (RollResult.Success, _) =>
-            val ddg = if (target.currentManeuver != Maneuver.AllOutDefenseIncreased) target.dodge
+            val ddg = if (target.currentManeuver != AllOutDefenseIncreased) target.dodge
             else target.dodge + 2
-            if (target.currentManeuver != Maneuver.AllOutAttackDetermined &&
-              target.currentManeuver != Maneuver.AllOutAttackDouble &&
-              target.currentManeuver != Maneuver.AllOutAttackStrong &&
-              target.currentManeuver != Maneuver.AllOutDefenseDouble
+            if (target.currentManeuver != AllOutAttackDetermined &&
+              target.currentManeuver != AllOutAttackDouble &&
+              target.currentManeuver != AllOutAttackStrong &&
+              target.currentManeuver != AllOutDefenseDouble
             ) {
               Rolls.successRoll(ddg) match
                 case (RollResult.Success, _) => println("enemy evades your blow")
@@ -124,7 +124,7 @@ object ArenaMain {
                   println("You hit!")
                   dealDamage(char, target, weapon, man)
             }
-            else if (target.currentManeuver == Maneuver.AllOutDefenseDouble) {
+            else if (target.currentManeuver == AllOutDefenseDouble) {
               Rolls.bestOfTwo(Rolls.successRoll(ddg), Rolls.successRoll(ddg)) match
                 case RollResult.Success | RollResult.CriticalSuccess =>
                   println("enemy evades your blow")
