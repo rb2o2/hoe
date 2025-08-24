@@ -39,6 +39,8 @@ case class Char(name: String,
                 spells: List[Spell]
                ) {
   def dodge: Int = Math.floor(bs).toInt + 3
+  var x: Int = 0
+  var y: Int = 0
   var shockPenalty: Int = 0
   var stunned: Boolean = false
   var surprised: Boolean = false
