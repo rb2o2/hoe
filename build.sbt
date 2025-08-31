@@ -6,3 +6,4 @@ lazy val root = (project in file("."))
   .settings(
     name := "halls"
   )
+  .settings(assembly / mainClass := Some("rb2o2.halls.gui.AppMain"))
