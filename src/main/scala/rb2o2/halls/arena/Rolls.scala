@@ -8,7 +8,7 @@ object Rolls {
   private val rnd = new Random(System.currentTimeMillis())
   def successRoll(effective: Int): (RollResult, Int) = {
     var sum = 0
-    for {d <- 1.to(3)} {
+    for {_ <- 1.to(3)} {
       sum += rnd.nextInt(6) + 1
       rnd.setSeed(System.currentTimeMillis())
     }
@@ -41,7 +41,7 @@ object Rolls {
 
   def damageRoll(diceMod: (Int, Int)): Int = {
     var sum = 0
-    for {d <- 1.to(diceMod._1)} {
+    for {_ <- 1.to(diceMod._1)} {
       sum += rnd.nextInt(6) + 1
       rnd.setSeed(System.currentTimeMillis())
     }

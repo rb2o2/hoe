@@ -3,13 +3,13 @@ package rb2o2.halls.map
 import rb2o2.halls.arena.{Graph, Hex}
 
 object AStar {
-  def heuristic(a: Hex, b: Hex): Double = {
-    // Евклидова дистанция как эвристика
+  private def heuristic(a: Hex, b: Hex): Double = {
+    // Euclidean distance
     math.sqrt(math.pow(a.xd - b.xd, 2) + math.pow(a.yd - b.yd, 2))
   }
 
   def findPath(graph: Graph, start: Hex, goal: Hex): Option[List[Hex]] = {
-    // Очередь с приоритетом по стоимости f = g + h
+    // Priority queue by  f = g + h
     implicit val ord: Ordering[(Double, Hex)] = Ordering.by(-_._1)
     val openSet = scala.collection.mutable.PriorityQueue[(Double, Hex)]()
     openSet.enqueue((0.0 + heuristic(start, goal), start))
@@ -22,7 +22,7 @@ object AStar {
       val (_, current) = openSet.dequeue()
 
       if (current == goal) {
-        // Восстановление пути
+        // Path restoring
         val path = scala.collection.mutable.ListBuffer[Hex]()
         var currOpt: Option[Hex] = Some(current)
         while (currOpt.isDefined) {
@@ -42,7 +42,7 @@ object AStar {
         }
       }
     }
-    // Путь не найден
+    // Path not found
     None
   }
 }

@@ -74,9 +74,9 @@ class MapPanel(map: GameMap) extends JPanel {
 
       for (cont <- hexContents) {
         val img = cont.sprite
-        val viewCoordsx = hex.xd
-        val viewCoordsy = hex.yd
-        g2d.drawImage(img.getImage, viewCoordsx.toInt, viewCoordsy.toInt, this)
+        val viewCoordsX = hex.xd
+        val viewCoordsY = hex.yd
+        g2d.drawImage(img.getImage, viewCoordsX.toInt, viewCoordsY.toInt, this)
       }
     }
 

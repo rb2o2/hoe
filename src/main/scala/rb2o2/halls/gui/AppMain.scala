@@ -47,7 +47,7 @@ class AppMain(title: String) extends JFrame(title) {
     add(mapPanel, BorderLayout.CENTER)
     add(optionsStatsPanel, BorderLayout.EAST)
   }
-  def initMap(): GameMap = {
+  private def initMap(): GameMap = {
     GameMap.simple()
   }
 }
