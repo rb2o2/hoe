@@ -5,7 +5,7 @@ import rb2o2.halls.arena.{Graph, Hex}
 object AStar {
   private def heuristic(a: Hex, b: Hex): Double = {
     // Euclidean distance
-    math.sqrt(math.pow(a.xd - b.xd, 2) + math.pow(a.yd - b.yd, 2))
+    0.003 * math.sqrt(math.pow(a.xd - b.xd, 2) + math.pow(a.yd - b.yd, 2))
   }
 
   def findPath(graph: Graph, start: Hex, goal: Hex): Option[List[Hex]] = {
