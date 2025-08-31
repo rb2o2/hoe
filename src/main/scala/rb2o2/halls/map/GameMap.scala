@@ -4,7 +4,7 @@ import rb2o2.halls.arena.{Field, Hero, Hex, HexGrid}
 
 class GameMap(val w: Int, val h: Int) {
   var grid = new HexGrid()
-
+  var selected: Option[Hero] = None
 }
 object GameMap {
   def simple(): GameMap = {
@@ -18,4 +18,5 @@ object GameMap {
     ).toList
     map
   }
+
 }

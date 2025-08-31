@@ -1,5 +1,7 @@
 package rb2o2.halls.arena
 
+import rb2o2.halls.map.AStar
+
 import javax.swing.ImageIcon
 import scala.collection.mutable.ListBuffer
 
