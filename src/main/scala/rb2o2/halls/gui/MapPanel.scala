@@ -1,7 +1,7 @@
 package rb2o2.halls.gui
 
 import rb2o2.halls.Utils
-import rb2o2.halls.arena.{Hero, Graph, HexGrid, Highlight, MoveHighlight, Selection}
+import rb2o2.halls.arena.{Graph, Hero, Hex, HexGrid, Highlight, MoveForbiddenHighlight, MoveHighlight, Selection}
 import rb2o2.halls.map.{AStar, GameMap}
 
 import java.awt.event.{MouseAdapter, MouseEvent}
@@ -34,7 +34,14 @@ class MapPanel(map: GameMap) extends JPanel {
           AStar.findPath(graph,
               map.grid.hexes.find(_.contents.indexOf(hero) != -1).get,
               map.grid.hexes.find(hex => hex.x == sz._1 && hex.y == sz._2).get
-          ).map(list => list.drop(1).foreach(h => h.addContent(new MoveHighlight(h.x, h.y)))))
+          ).map(list =>
+            for {(h,ind) <- list.drop(1).zipWithIndex}
+              h.addContent(
+                if (ind < hero.charlist.bm)
+                  new MoveHighlight(h.x, h.y)
+                else
+                  new MoveForbiddenHighlight(h.x, h.y)))
+      )
 
 //      println(map.grid.hexes.find(hex => hex.x == sz._1 && hex.y == sz._2).get.contents)
 
@@ -42,20 +49,57 @@ class MapPanel(map: GameMap) extends JPanel {
     }
   })
   addMouseListener(new MouseAdapter {
-    override def mouseClicked(e: MouseEvent): Unit = {
+    override def mousePressed(e: MouseEvent): Unit = {
+      def select(heroClicked: Hero) : Unit = {
+        map.selected = Some(heroClicked)
+        map.grid.hexes.filter(hex => hex.contents.exists(_.isInstanceOf[Highlight]))
+          .map(h => h.contents.remove(h.contents.indexOf(h.contents.find(_.isInstanceOf[Highlight]).get)))
+        map.selected match {
+          case None => ()
+          case Some(hero) => map.grid.hexes.find(_.contents.contains(hero))
+            .foreach(h => h.contents.insert(h.contents.indexOf(hero), new Highlight(h.x, h.y)))
+        }
+      }
+      def moveHero(hero: Hero, hex: Hex): Unit = {
+        val gridPass = new HexGrid()
+        gridPass.hexes = map.grid.hexes.filterNot(_.contents.exists(c => !c.passable && !c.isInstanceOf[Hero]))
+        val graph = Graph(gridPass)
+        val path = AStar.findPath(graph,
+          map.grid.hexes.find(_.contents.indexOf(hero) != -1).get,
+          map.grid.hexes.find(h => h.x == hex.x && h.y == hex.y).get
+        )
+        map.grid.hexes.filter(hex => hex.contents.exists(_.isInstanceOf[Highlight]))
+          .map(h => h.contents.remove(h.contents.indexOf(h.contents.find(_.isInstanceOf[Highlight]).get)))
+        path.foreach(p => {
+          for {(h,ind) <- p.zipWithIndex
+               if ind < hero.charlist.bm + 1} {
+            map.grid.hexes.find(_.contents.indexOf(hero) != -1)
+              .foreach(hex => hex.contents.remove(hex.contents.indexOf(hero)))
+            hero.x = h.x
+            hero.y = h.y
+            map.grid.hexes.find(_ == h)
+              .foreach(hex => hex.addContent(hero))
+            Thread.sleep(200)
+            update(getGraphics)
+            getComponents.foreach(c=>c.update(c.getGraphics))
+          }
+        })
+      }
       val sz = Utils.screenXYToHexCoords(e.getX, e.getY)
       println(s"${sz._1}, ${sz._2}")
-      val heroMaybe: Option[Hero] = map.grid.hexes.find(h =>
-        h.contents.exists(_.isInstanceOf[Hero]) && h.x == sz._1 && h.y == sz._2)
-        .flatMap(_.contents.find(_.isInstanceOf[Hero])).map(_.asInstanceOf[Hero])
-      // println(heroMaybe)
-      map.selected = heroMaybe
-      map.grid.hexes.filter(hex => hex.contents.exists(_.isInstanceOf[Highlight]))
-        .map(h => h.contents.remove(h.contents.indexOf(h.contents.find(_.isInstanceOf[Highlight]).get)))
+      val hexClicked = map.grid.hexes.find(h => h.x == sz._1 && h.y == sz._2).get
+      val heroClicked: Option[Hero] = hexClicked.contents.find(_.isInstanceOf[Hero]).map(_.asInstanceOf[Hero])
+      // println(heroClicked)
       map.selected match {
-        case None => ()
-        case Some(hero) => map.grid.hexes.find(_.contents.contains(hero))
-          .foreach(h => h.contents.insert(h.contents.indexOf(hero), new Highlight(h.x, h.y)))
+        case Some(hero) => heroClicked match {
+          case None => moveHero(hero, hexClicked)
+          case _ => select(hero)
+        }
+        case None => heroClicked match {
+          case None => ()
+          case Some(hero) =>
+            select(hero)
+        }
       }
       repaint()
     }

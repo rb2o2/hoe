@@ -16,6 +16,7 @@ enum DamageType {
   case Crushing
   case Cutting
   case Impaling
+  case Piercing
   case Burn
   case Corrosive
   case Toxic
