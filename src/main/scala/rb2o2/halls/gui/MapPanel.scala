@@ -26,12 +26,11 @@ class MapPanel(map: GameMap) extends JPanel {
       gridPass.hexes = map.grid.hexes.filterNot(_.contents.exists(c => !c.passable && !c.isInstanceOf[Hero]))
       val graph = Graph(gridPass)
 
-
       map.selected.foreach(hero =>
-        /*println(AStar.findPath(graph,
-          map.grid.hexes.find(_.contents.indexOf(hero) != -1).get,
-          map.grid.hexes.find(hex => hex.x == sz._1 && hex.y == sz._2).get
-        ))*/
+//        println(AStar.findPath(graph,
+//          map.grid.hexes.find(_.contents.indexOf(hero) != -1).get,
+//          map.grid.hexes.find(hex => hex.x == sz._1 && hex.y == sz._2).get
+//        ))
           AStar.findPath(graph,
               map.grid.hexes.find(_.contents.indexOf(hero) != -1).get,
               map.grid.hexes.find(hex => hex.x == sz._1 && hex.y == sz._2).get
@@ -46,7 +45,8 @@ class MapPanel(map: GameMap) extends JPanel {
     override def mouseClicked(e: MouseEvent): Unit = {
       val sz = Utils.screenXYToHexCoords(e.getX, e.getY)
       println(s"${sz._1}, ${sz._2}")
-      val heroMaybe: Option[Hero] = map.grid.hexes.find(h => h.contents.exists(_.isInstanceOf[Hero]) && h.x == sz._1 && h.y == sz._2)
+      val heroMaybe: Option[Hero] = map.grid.hexes.find(h =>
+        h.contents.exists(_.isInstanceOf[Hero]) && h.x == sz._1 && h.y == sz._2)
         .flatMap(_.contents.find(_.isInstanceOf[Hero])).map(_.asInstanceOf[Hero])
       // println(heroMaybe)
       map.selected = heroMaybe
@@ -79,5 +79,4 @@ class MapPanel(map: GameMap) extends JPanel {
         g2d.drawImage(img.getImage, viewCoordsX.toInt, viewCoordsY.toInt, this)
       }
     }
-
 }
