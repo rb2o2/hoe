@@ -9,6 +9,10 @@ import java.awt.{Graphics, Graphics2D, Toolkit}
 import javax.swing.JPanel
 
 class MapPanel(map: GameMap) extends JPanel {
+  private def removeHighlights(): Unit = {
+    map.grid.hexes.filter(hex => hex.contents.exists(_.isInstanceOf[Highlight]))
+      .map(h => h.contents.remove(h.contents.indexOf(h.contents.find(_.isInstanceOf[Highlight]).get)))
+  }
   addMouseMotionListener(new MouseAdapter {
     override def mouseMoved(e: MouseEvent): Unit = {
       val mx = e.getX
@@ -27,10 +31,6 @@ class MapPanel(map: GameMap) extends JPanel {
       val graph = Graph(gridPass)
 
       map.selected.foreach(hero =>
-//        println(AStar.findPath(graph,
-//          map.grid.hexes.find(_.contents.indexOf(hero) != -1).get,
-//          map.grid.hexes.find(hex => hex.x == sz._1 && hex.y == sz._2).get
-//        ))
           AStar.findPath(graph,
               map.grid.hexes.find(_.contents.indexOf(hero) != -1).get,
               map.grid.hexes.find(hex => hex.x == sz._1 && hex.y == sz._2).get
@@ -42,9 +42,6 @@ class MapPanel(map: GameMap) extends JPanel {
                 else
                   new MoveForbiddenHighlight(h.x, h.y)))
       )
-
-//      println(map.grid.hexes.find(hex => hex.x == sz._1 && hex.y == sz._2).get.contents)
-
       repaint()
     }
   })
@@ -52,8 +49,7 @@ class MapPanel(map: GameMap) extends JPanel {
     override def mousePressed(e: MouseEvent): Unit = {
       def select(heroClicked: Hero) : Unit = {
         map.selected = Some(heroClicked)
-        map.grid.hexes.filter(hex => hex.contents.exists(_.isInstanceOf[Highlight]))
-          .map(h => h.contents.remove(h.contents.indexOf(h.contents.find(_.isInstanceOf[Highlight]).get)))
+        removeHighlights()
         map.selected match {
           case None => ()
           case Some(hero) => map.grid.hexes.find(_.contents.contains(hero))
@@ -68,8 +64,7 @@ class MapPanel(map: GameMap) extends JPanel {
           map.grid.hexes.find(_.contents.indexOf(hero) != -1).get,
           map.grid.hexes.find(h => h.x == hex.x && h.y == hex.y).get
         )
-        map.grid.hexes.filter(hex => hex.contents.exists(_.isInstanceOf[Highlight]))
-          .map(h => h.contents.remove(h.contents.indexOf(h.contents.find(_.isInstanceOf[Highlight]).get)))
+        removeHighlights()
         path.foreach(p => {
           for {(h,ind) <- p.zipWithIndex
                if ind < hero.charlist.bm + 1} {
@@ -89,7 +84,6 @@ class MapPanel(map: GameMap) extends JPanel {
       println(s"${sz._1}, ${sz._2}")
       val hexClicked = map.grid.hexes.find(h => h.x == sz._1 && h.y == sz._2).get
       val heroClicked: Option[Hero] = hexClicked.contents.find(_.isInstanceOf[Hero]).map(_.asInstanceOf[Hero])
-      // println(heroClicked)
       map.selected match {
         case Some(hero) => heroClicked match {
           case None => moveHero(hero, hexClicked)
@@ -114,8 +108,6 @@ class MapPanel(map: GameMap) extends JPanel {
     val g2d: Graphics2D = g.asInstanceOf[Graphics2D]
     for (hex <- map.grid.hexes) {
       val hexContents = hex.contents.toArray
-//      Sorting.quickSort(hexContents)(Ordering[Int].on((p: GameObject) => p.zIndex))
-
       for (cont <- hexContents) {
         val img = cont.sprite
         val viewCoordsX = hex.xd - 32
