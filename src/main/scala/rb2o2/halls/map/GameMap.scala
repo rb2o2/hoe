@@ -16,9 +16,10 @@ object GameMap {
         Weapon("Bow", None, Some(DamageType.Piercing), None, Some(1), Skill("Bow", 2), true)
       ), List()
     )
-    val bearChar = Char("Brown Bear", 
-      18, 11, 6, 11, 20, 11, 9, 11, 5.5, 6, 1, (2, 1), (2, -1),
-      List(Weapon("Claws", Some(DamageType.Piercing), None, Some(1), None, Skill("Brawling", 1), false)),
+    val bearChar = Char("Brown Bear",
+      18, 11, 6, 11, 20, 11, 9, 11, 5.5, 6, 1, (3, 0), (1, 2),
+      List(Weapon("Claws", Some(DamageType.Piercing), None, Some(1), None, Skill("Brawling", 1), false),
+        Weapon("Bite", Some(DamageType.Piercing), None, Some(1), None, Skill("Brawling", 1), false)),
       List()
     )
     val map = new GameMap(15, 15)
