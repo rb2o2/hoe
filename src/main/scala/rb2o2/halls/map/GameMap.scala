@@ -8,13 +8,21 @@ class GameMap(val w: Int, val h: Int) {
 }
 object GameMap {
   def simple(): GameMap = {
-    val heroChar = Char("Bob Trainerton",
-      12, 11, 10, 11, 12, 11, 10, 10, 5.5, 6, 2, (1, 1), (1, -1),
-      List(Weapon("Axe", Some(DamageType.Cutting), None, Some(4), None, Skill("Axe", 2), false),
+    val heroChar = Char(name="Bob Trainerton",
+      st=12, dx=11, iq=10, ht=11, hp=12, fp=11, wil=10, per=10, bs=5.5, bm=6, dr=2, damageSw=(1, 1), damageThr=(1, -1),
+      weapons=List(Weapon(
+        name="Axe",
+        swDmgType=Some(DamageType.Cutting),
+        thrDmgType=None,
+        swMod=Some(4),
+        thrMod=None,
+        skill=Skill(name="Axe",relativeLevel=2),
+        ranged=false),
         Weapon("Mace", Some(DamageType.Crushing), None, Some(3), None, Skill("Mace", 2), false),
         Weapon("Fists", None, Some(DamageType.Crushing), None, Some(0), Skill("Brawling", 2), false),
         Weapon("Bow", None, Some(DamageType.Piercing), None, Some(1), Skill("Bow", 2), true)
-      ), List()
+      ),
+      spells=List()
     )
     val bearChar = Char("Brown Bear",
       18, 11, 6, 11, 20, 11, 9, 11, 5.5, 6, 1, (3, 0), (1, 2),
