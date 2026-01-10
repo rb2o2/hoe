@@ -1,6 +1,12 @@
 package rb2o2.halls.map
 
-import rb2o2.halls.arena.{Bear, Char, DamageType, Field, Hero, Hex, HexGrid, Skill, SpruceTree1, Weapon}
+import rb2o2.halls.arena.{Bear, Char, DamageType, Field, GameObject, Hero, Hex, HexGrid, Skill, SpruceTree1, Weapon}
+
+import java.io.InputStream
+import java.nio.charset.StandardCharsets
+import java.util.Scanner
+
+import scala.jdk.CollectionConverters._
 
 class GameMap(val w: Int, val h: Int) {
   var grid = new HexGrid()
@@ -42,6 +48,39 @@ object GameMap {
         h
       }
     ).toList
+    map
+  }
+  def load(dataStream: InputStream): GameMap = {
+    val levelString = new String(dataStream.readAllBytes(), StandardCharsets.UTF_8)
+    val scanner = new Scanner(levelString)
+    val w = scanner.nextInt()
+    val h = scanner.nextInt()
+    val symbols: Map[(Int,Int), String] = (
+      for {
+        lines <- levelString.lines().toList.asScala.slice(1, h + 1).zipWithIndex
+        l <- lines._1.split(" ").zipWithIndex}
+      yield (lines._2, l._2) -> l._1.substring(0,1)
+      ).toMap
+    val legend: Map[String, Class[_ <: GameObject]] = (
+      for {
+        s <- levelString.lines().toList.asScala.drop(h+1)
+        symb = s.substring(0,1)
+        obj = Class.forName(s.substring(2)).asInstanceOf[Class[GameObject]]}
+      yield symb -> obj
+      ).toMap
+    val map = new GameMap(w, h)
+    map.grid.hexes = (
+      for {
+        i <- -1.until(w+1)
+        j <- -1.until(h+1)}
+      yield {
+        val hx = new Hex(i,j)
+        symbols.get((j,i)).foreach((s: String) => hx.addContent({
+          val c: Class[_ <: GameObject] = legend(s)
+          c.getDeclaredConstructors()(0).newInstance(i, j).asInstanceOf[GameObject]
+        }))
+        hx
+      }).toList
     map
   }
 

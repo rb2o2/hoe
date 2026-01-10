@@ -8,5 +8,5 @@ lazy val root = (project in file("."))
     name := "halls",
     Compile / mainClass := Some("rb2o2.halls.gui.HoE"))
 
-
+//resourceDirectory := baseDirectory.value / "src/main/resources"
 //Universal / mainClass := Some("rb2o2.halls.gui.AppMain")

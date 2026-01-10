@@ -6,9 +6,9 @@ import rb2o2.halls.map.GameMap
 import java.awt.{BorderLayout, Color, Dimension}
 import javax.swing.{BorderFactory, JFrame, JPanel, WindowConstants}
 
-object HoE extends JFrame {
+object HoE {
   def main(args: Array[String]): Unit = {
-    val frame = new HoE("Halls of Enlightenment v0.1.1")
+    val frame = new HoEFrame("Halls of Enlightenment v0.1.1")
     frame.setLayout(new BorderLayout())
     frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE)
     frame.setSize(new Dimension(1480, 980))
@@ -19,7 +19,7 @@ object HoE extends JFrame {
   }
 }
 
-class HoE(title: String) extends JFrame(title) {
+class HoEFrame(title: String) extends JFrame(title) {
   def initUI(): Unit = {
     val mapLog = new JPanel(new BorderLayout())
     mapLog.setPreferredSize(new Dimension(1000,980))
@@ -50,6 +50,9 @@ class HoE(title: String) extends JFrame(title) {
     add(optionsStatsPanel, BorderLayout.EAST)
   }
   private def initMap(): GameMap = {
-    GameMap.simple()
+    val mapStream = getClass.getClassLoader.getResourceAsStream("assets/map0.hmap")
+    val map = GameMap.load(mapStream)
+    mapStream.close()
+    map
   }
 }
