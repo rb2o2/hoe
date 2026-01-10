@@ -24,7 +24,7 @@ class HoEFrame(title: String) extends JFrame(title) {
     val mapLog = new JPanel(new BorderLayout())
     mapLog.setPreferredSize(new Dimension(1000,980))
     val mapPanel = new MapPanel(initMap())
-    mapPanel.setBackground(Color.BLACK)
+    mapPanel.setBackground(new Color(42,102,18))
 //    mapPanel.setBorder(BorderFactory.createLineBorder(Color.GREEN))
     mapPanel.setPreferredSize(new Dimension(1000, 880))
     val logPanel = new JPanel()
