@@ -60,9 +60,9 @@ class MapPanel(map: GameMap) extends JPanel {
       val rot = e.getWheelRotation
       println(s"wheel $rot")
       if (rot < 0) {
-        zoom += 0.1
+        zoom *= 1.1
       } else {
-        zoom -= 0.1
+        zoom /= 1.1
       }
       repaint()
 
