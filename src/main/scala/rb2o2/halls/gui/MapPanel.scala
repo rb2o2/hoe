@@ -4,12 +4,13 @@ import rb2o2.halls.Utils
 import rb2o2.halls.arena.{Graph, Hero, Hex, HexGrid, Highlight, MoveForbiddenHighlight, MoveHighlight, Selection, SlashEffect}
 import rb2o2.halls.map.{AStar, GameMap}
 
-import java.awt.event.{MouseAdapter, MouseEvent}
+import java.awt.event.{MouseAdapter, MouseEvent, MouseWheelEvent, MouseWheelListener}
 import java.awt.{Graphics, Graphics2D, Toolkit}
 import javax.swing.JPanel
 
 class MapPanel(map: GameMap) extends JPanel {
   val self: MapPanel = this
+  var zoom = 1.0
   private def removeHighlights(): Unit = {
     map.grid.hexes.filter(hex => hex.contents.exists(_.isInstanceOf[Highlight]))
       .map(h => h.contents.remove(h.contents.indexOf(h.contents.find(_.isInstanceOf[Highlight]).get)))
@@ -19,7 +20,7 @@ class MapPanel(map: GameMap) extends JPanel {
       val mx = e.getX
       val my = e.getY
 //      println(s"$mx : $my")
-      val sz = Utils.screenXYToHexCoords(mx, my)
+      val sz = Utils.screenXYToHexCoords((mx /zoom).toInt, (my /zoom).toInt)
       map.grid.hexes.filter(hex => hex.contents.exists(_.isInstanceOf[Selection]))
         .map(h => h.contents.remove(h.contents.indexOf(h.contents.find(_.isInstanceOf[Selection]).get)))
       map.grid.hexes.find(hex => hex.x == sz._1 && hex.y == sz._2)
@@ -52,6 +53,19 @@ class MapPanel(map: GameMap) extends JPanel {
 //              }
       ))
       repaint()
+    }
+  })
+  addMouseWheelListener((e: MouseWheelEvent) => {
+    if (contains(e.getX, e.getY)) {
+      val rot = e.getWheelRotation
+      println(s"wheel $rot")
+      if (rot < 0) {
+        zoom += 0.1
+      } else {
+        zoom -= 0.1
+      }
+      repaint()
+
     }
   })
   addMouseListener(new MouseAdapter {
@@ -89,7 +103,7 @@ class MapPanel(map: GameMap) extends JPanel {
           }
         })
       }
-      val sz = Utils.screenXYToHexCoords(e.getX, e.getY)
+      val sz = Utils.screenXYToHexCoords((e.getX / zoom).toInt, (e.getY/ zoom).toInt)
       println(s"${sz._1}, ${sz._2}")
       val hexClicked = map.grid.hexes.find(h => h.x == sz._1 && h.y == sz._2).get
       val heroClicked: Option[Hero] = hexClicked.contents.find(_.isInstanceOf[Hero]).map(_.asInstanceOf[Hero])
@@ -119,9 +133,9 @@ class MapPanel(map: GameMap) extends JPanel {
       val hexContents = hex.contents.toArray
       for (cont <- hexContents) {
         val img = cont.sprite
-        val viewCoordsX = hex.xd - 32
-        val viewCoordsY = hex.yd - 37
-        g2d.drawImage(img.getImage, viewCoordsX.toInt, viewCoordsY.toInt, this)
+        val viewCoordsX = (hex.xd - 32) * zoom
+        val viewCoordsY = (hex.yd - 37) * zoom
+        g2d.drawImage(img.getImage, viewCoordsX.toInt, viewCoordsY.toInt, (img.getIconWidth * zoom).toInt, (img.getIconHeight * zoom).toInt, this)
       }
     }
 }
