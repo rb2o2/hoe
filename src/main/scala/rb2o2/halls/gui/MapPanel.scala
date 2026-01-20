@@ -10,6 +10,8 @@ import javax.swing.JPanel
 
 class MapPanel(map: GameMap) extends JPanel {
   val self: MapPanel = this
+  val MAXZOOM = 2.5
+  val MINZOOM = 0.4
   var zoom = 1.0
   private def removeHighlights(): Unit = {
     map.grid.hexes.filter(hex => hex.contents.exists(_.isInstanceOf[Highlight]))
@@ -59,12 +61,13 @@ class MapPanel(map: GameMap) extends JPanel {
     if (contains(e.getX, e.getY)) {
       val rot = e.getWheelRotation
       println(s"wheel $rot")
-      if (rot < 0) {
+      if (rot < 0 && zoom <= MAXZOOM/1.1) {
         zoom *= 1.1
-      } else {
+        repaint()
+      } else if ( rot > 0 && zoom > MINZOOM*1.1) {
         zoom /= 1.1
+        repaint()
       }
-      repaint()
 
     }
   })

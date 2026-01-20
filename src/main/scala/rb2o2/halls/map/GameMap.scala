@@ -5,31 +5,30 @@ import rb2o2.halls.arena.{Bear, Char, DamageType, Field, GameObject, Hero, Hex, 
 import java.io.InputStream
 import java.nio.charset.StandardCharsets
 import java.util.Scanner
-
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 
 class GameMap(val w: Int, val h: Int) {
   var grid = new HexGrid()
   var selected: Option[Hero] = None
 }
 object GameMap {
+  val heroChar: Char = Char(name = "Bob Trainerton",
+    st = 12, dx = 11, iq = 10, ht = 11, hp = 12, fp = 11, wil = 10, per = 10, bs = 5.5, bm = 6, dr = 2, damageSw = (1, 1), damageThr = (1, -1),
+    weapons = List(Weapon(
+      name = "Axe",
+      swDmgType = Some(DamageType.Cutting),
+      thrDmgType = None,
+      swMod = Some(4),
+      thrMod = None,
+      skill = Skill(name = "Axe", relativeLevel = 2),
+      ranged = false),
+      Weapon("Mace", Some(DamageType.Crushing), None, Some(3), None, Skill("Mace", 2), false),
+      Weapon("Fists", None, Some(DamageType.Crushing), None, Some(0), Skill("Brawling", 2), false),
+      Weapon("Bow", None, Some(DamageType.Piercing), None, Some(1), Skill("Bow", 2), true)
+    ),
+    spells = List()
+  )
   def simple(): GameMap = {
-    val heroChar = Char(name="Bob Trainerton",
-      st=12, dx=11, iq=10, ht=11, hp=12, fp=11, wil=10, per=10, bs=5.5, bm=6, dr=2, damageSw=(1, 1), damageThr=(1, -1),
-      weapons=List(Weapon(
-        name="Axe",
-        swDmgType=Some(DamageType.Cutting),
-        thrDmgType=None,
-        swMod=Some(4),
-        thrMod=None,
-        skill=Skill(name="Axe",relativeLevel=2),
-        ranged=false),
-        Weapon("Mace", Some(DamageType.Crushing), None, Some(3), None, Skill("Mace", 2), false),
-        Weapon("Fists", None, Some(DamageType.Crushing), None, Some(0), Skill("Brawling", 2), false),
-        Weapon("Bow", None, Some(DamageType.Piercing), None, Some(1), Skill("Bow", 2), true)
-      ),
-      spells=List()
-    )
     val bearChar = Char("Brown Bear",
       18, 11, 6, 11, 20, 11, 9, 11, 5.5, 6, 1, (3, 0), (1, 2),
       List(Weapon("Claws", Some(DamageType.Piercing), None, Some(1), None, Skill("Brawling", 1), false),
@@ -58,8 +57,10 @@ object GameMap {
     val symbols: Map[(Int,Int), String] = (
       for {
         lines <- levelString.lines().toList.asScala.slice(1, h + 1).zipWithIndex
-        l <- lines._1.split(" ").zipWithIndex}
-      yield (lines._2, l._2) -> l._1.substring(0,1)
+        l <- lines._1.chars.mapToObj(
+          i => new String(List(i.toByte).toArray[Byte], StandardCharsets.UTF_8))
+          .toList.asScala.zipWithIndex.filter(_._2 % 2==0 ).map(_._1).zipWithIndex}
+      yield (lines._2, l._2) -> l._1
       ).toMap
     val legend: Map[String, Class[_ <: GameObject]] = (
       for {
@@ -75,9 +76,11 @@ object GameMap {
         j <- -1.until(h+1)}
       yield {
         val hx = new Hex(i,j)
-        symbols.get((j,i)).foreach((s: String) => hx.addContent({
+        symbols.get((j,i))
+          .filter(_ != " ")
+          .foreach((s: String) => hx.addContent({
           val c: Class[_ <: GameObject] = legend(s)
-          c.getDeclaredConstructors()(0).newInstance(i, j).asInstanceOf[GameObject]
+          c.getDeclaredConstructors().find(_.getParameterCount == 2).get.newInstance(i, j).asInstanceOf[GameObject]
         }))
         hx
       }).toList
