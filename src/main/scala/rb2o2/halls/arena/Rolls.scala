@@ -8,26 +8,29 @@ object Rolls {
   private val rnd = new Random(System.currentTimeMillis())
   def successRoll(effective: Int): (RollResult, Int) = {
     var sum = 0
-    for {_ <- 1.to(3)} {
+    for { _ <- 1.to(3) } {
       sum += rnd.nextInt(6) + 1
       rnd.setSeed(System.currentTimeMillis())
     }
     val margin = effective - sum
     val res = sum match {
-      case 3 => CriticalSuccess
-      case 4 => CriticalSuccess
-      case 5 if effective >= 15 => CriticalSuccess
-      case 6 if effective >= 16 => CriticalSuccess
-      case 18 => CriticalFailure
-      case 17 if effective < 16 => CriticalFailure
+      case 3                        => CriticalSuccess
+      case 4                        => CriticalSuccess
+      case 5 if effective >= 15     => CriticalSuccess
+      case 6 if effective >= 16     => CriticalSuccess
+      case 18                       => CriticalFailure
+      case 17 if effective < 16     => CriticalFailure
       case a if effective <= a - 10 => CriticalFailure
-      case a if a > effective => Failure
-      case _ => Success
+      case a if a > effective       => Failure
+      case _                        => Success
     }
     (res, margin)
   }
 
-  def bestOfTwo(first: (RollResult, Int), second: (RollResult, Int)): RollResult = {
+  def bestOfTwo(
+      first: (RollResult, Int),
+      second: (RollResult, Int)
+  ): RollResult = {
     if (first._1 == Success) {
       if (second._1 == CriticalSuccess) CriticalSuccess
       else Success
@@ -41,7 +44,7 @@ object Rolls {
 
   def damageRoll(diceMod: (Int, Int)): Int = {
     var sum = 0
-    for {_ <- 1.to(diceMod._1)} {
+    for { _ <- 1.to(diceMod._1) } {
       sum += rnd.nextInt(6) + 1
       rnd.setSeed(System.currentTimeMillis())
     }

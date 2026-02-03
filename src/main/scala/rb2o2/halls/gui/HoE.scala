@@ -22,9 +22,9 @@ object HoE {
 class HoEFrame(title: String) extends JFrame(title) {
   def initUI(): Unit = {
     val mapLog = new JPanel(new BorderLayout())
-    mapLog.setPreferredSize(new Dimension(1000,980))
+    mapLog.setPreferredSize(new Dimension(1000, 980))
     val mapPanel = new MapPanel(initMap())
-    mapPanel.setBackground(new Color(55,151,33))
+    mapPanel.setBackground(new Color(55, 151, 33))
 //    mapPanel.setBorder(BorderFactory.createLineBorder(Color.GREEN))
     mapPanel.setPreferredSize(new Dimension(1000, 880))
     val logPanel = new JPanel()
@@ -50,7 +50,8 @@ class HoEFrame(title: String) extends JFrame(title) {
     add(optionsStatsPanel, BorderLayout.EAST)
   }
   private def initMap(): GameMap = {
-    val mapStream = getClass.getClassLoader.getResourceAsStream("assets/map0.hmap")
+    val mapStream =
+      getClass.getClassLoader.getResourceAsStream("assets/map0.hmap")
     val map = GameMap.load(mapStream)
     mapStream.close()
     map

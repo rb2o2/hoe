@@ -11,7 +11,7 @@ enum Maneuver {
   case Aim // +acc to ranged attack roll
   case Concentrate
   case Move
-  case MoveAndAttack //-4 to skill
+  case MoveAndAttack // -4 to skill
   case Ready
   case ChangePosture
 }

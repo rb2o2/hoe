@@ -15,7 +15,9 @@ object AStar {
     openSet.enqueue((0.0 + heuristic(start, goal), start))
 
     val cameFrom = scala.collection.mutable.Map[Hex, Option[Hex]]()
-    val gScore = scala.collection.mutable.Map[Hex, Double]().withDefaultValue(Double.PositiveInfinity)
+    val gScore = scala.collection.mutable
+      .Map[Hex, Double]()
+      .withDefaultValue(Double.PositiveInfinity)
     gScore(start) = 0.0
 
     while (openSet.nonEmpty) {
