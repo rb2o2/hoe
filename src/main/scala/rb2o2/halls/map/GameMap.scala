@@ -82,20 +82,20 @@ object GameMap {
   def simple(): GameMap = {
     val bearChar = Char(
       "Brown Bear",
-      18,
-      11,
-      6,
-      11,
-      20,
-      11,
-      9,
-      11,
-      5.5,
-      6,
-      1,
-      (3, 0),
-      (1, 2),
-      List(
+      st = 18,
+      dx = 11,
+      iq = 6,
+      ht = 11,
+      hp = 20,
+      fp = 11,
+      wil = 9,
+      per = 11,
+      bs = 5.5,
+      bm = 6,
+      dr = 1,
+      damageSw = (3, 0),
+      damageThr = (1, 2),
+      weapons = List(
         Weapon(
           "Claws",
           Some(DamageType.Piercing),
@@ -115,7 +115,7 @@ object GameMap {
           false
         )
       ),
-      List()
+      spells = List()
     )
     val map = new GameMap(15, 15)
     map.grid.hexes = (for {
