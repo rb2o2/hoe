@@ -1,4 +1,7 @@
-package rb2o2.halls.arena
+package rb2o2.halls.objects
+
+import rb2o2.halls.arena.GameObject
+
 import javax.swing.ImageIcon
 
 class Selection(val x: Int, val y: Int) extends GameObject {

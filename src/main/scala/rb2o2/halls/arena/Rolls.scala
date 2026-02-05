@@ -51,10 +51,3 @@ object Rolls {
     Math.max(sum + diceMod._2, 0)
   }
 }
-
-enum RollResult {
-  case Success
-  case CriticalSuccess
-  case Failure
-  case CriticalFailure
-}

@@ -1,18 +1,9 @@
 package rb2o2.halls.gui
 
 import rb2o2.halls.Utils
-import rb2o2.halls.arena.{
-  Graph,
-  Hero,
-  Hex,
-  HexGrid,
-  Highlight,
-  MoveForbiddenHighlight,
-  MoveHighlight,
-  Selection,
-  SlashEffect
-}
+import rb2o2.halls.arena.{Graph, Hex, HexGrid}
 import rb2o2.halls.map.{AStar, GameMap}
+import rb2o2.halls.objects.*
 
 import java.awt.event.{
   MouseAdapter,

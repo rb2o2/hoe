@@ -16,41 +16,8 @@ class HexGrid {
 
 }
 
-trait GameObject {
-  var x: Int
-  var y: Int
-  var passable: Boolean = true
-  var sprite: ImageIcon
-}
-
 /** hex is upright i.e. point up, connected horizontally.
   */
-class Hex(val x: Int, val y: Int, val xd: Double, val yd: Double) {
-  def this(x: Int, y: Int) = {
-    this(
-      x,
-      y,
-      64 * (x + 0.5 * (y % 2)) + 32,
-      64 * (y * Math.cos(Math.PI / 6)) + 37
-    )
-  }
-  def neighbors: List[(Int, Int)] = {
-    val parity = Math.abs(y) % 2
-    List(
-      (x - 1, y),
-      (x + parity - 1, y + 1),
-      (x + parity, y + 1),
-      (x + 1, y),
-      (x + parity, y - 1),
-      (x + parity - 1, y - 1)
-    )
-  }
-  val contents: collection.mutable.ListBuffer[GameObject] =
-    new ListBuffer[GameObject]()
-  def addContent(content: GameObject): Unit = {
-    if (content.x == x && content.y == y) contents += content
-  }
-}
 
 object HexGrid {
   def main(args: Array[String]): Unit = {
@@ -76,22 +43,4 @@ object HexGrid {
     )
     println(grid.neighbors(3, 2).map(h => s"${h.x}:${h.y}"))
   }
-}
-
-case class Edge(from: Hex, to: Hex, cost: Double)
-
-class Graph(val nodes: Seq[Hex], val edges: Seq[Edge]) {
-  private val adjacencyMap: Map[Hex, Seq[(Hex, Double)]] = {
-    edges.groupBy(_.from).view.mapValues(_.map(e => (e.to, e.cost))).toMap
-  }
-  def this(grid: HexGrid) = {
-    this(
-      grid.hexes,
-      grid.hexes.flatMap(h =>
-        grid.neighbors(h.x, h.y).map(e => Edge(h, e, 1.0))
-      )
-    )
-  }
-  def neighbors(node: Hex): Seq[(Hex, Double)] =
-    adjacencyMap.getOrElse(node, Seq.empty)
 }

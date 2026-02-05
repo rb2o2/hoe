@@ -1,18 +1,15 @@
 package rb2o2.halls.map
 
 import rb2o2.halls.arena.{
-  Bear,
   Char,
   DamageType,
-  Field,
   GameObject,
-  Hero,
   Hex,
   HexGrid,
   Skill,
-  SpruceTree1,
   Weapon
 }
+import rb2o2.halls.objects.{Bear, Field, Hero, SpruceTree1}
 
 import java.io.InputStream
 import java.nio.charset.StandardCharsets
@@ -23,6 +20,7 @@ class GameMap(val w: Int, val h: Int) {
   var grid = new HexGrid()
   var selected: Option[Hero] = None
 }
+
 object GameMap {
   val heroChar: Char = Char(
     name = "Bob Trainerton",
@@ -183,5 +181,4 @@ object GameMap {
     }).toList
     map
   }
-
 }

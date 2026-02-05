@@ -1,29 +1,5 @@
 package rb2o2.halls.arena
 
-case class Skill(name: String, relativeLevel: Int)
-
-case class Weapon(
-    name: String,
-    swDmgType: Option[DamageType],
-    thrDmgType: Option[DamageType],
-    swMod: Option[Int],
-    thrMod: Option[Int],
-    skill: Skill,
-    ranged: Boolean
-)
-
-case class Spell(name: String, skill: Skill)
-
-enum DamageType {
-  case Crushing
-  case Cutting
-  case Impaling
-  case Piercing
-  case Burn
-  case Corrosive
-  case Toxic
-  case Explosive
-}
 case class Char(
     name: String,
     st: Int,

@@ -1,4 +1,7 @@
-package rb2o2.halls.arena
+package rb2o2.halls.objects
+
+import rb2o2.halls.arena.GameObject
+
 import java.io.File
 import javax.imageio.ImageIO
 import javax.swing.ImageIcon
