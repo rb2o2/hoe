@@ -4,7 +4,8 @@ import rb2o2.halls.arena.{Char, GameObject}
 
 import javax.swing.ImageIcon
 
-class Bear(var x: Int, var y: Int, var charlist: Char) extends GameObject {
+class Bear(var x: Int, var y: Int, var charlist: Char)
+    extends Creature(charlist) {
   var sprite: ImageIcon = new ImageIcon(
     getClass.getClassLoader
       .getResourceAsStream("assets/bear.png")
