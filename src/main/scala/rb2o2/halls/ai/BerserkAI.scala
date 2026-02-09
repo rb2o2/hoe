@@ -12,11 +12,11 @@ import rb2o2.halls.map.AStar
 import rb2o2.halls.objects.{Creature, Hero}
 
 class BerserkAI(entity: Creature) {
-  def chooseManeuver(map: GameMap): (Maneuver, GameObject, Int) = {
+  def chooseManeuver(map: GameMap): (Maneuver, GameObject) = {
     val heroes = for {
       hx <- map.grid.hexes if hx.contents.exists(_.isInstanceOf[Hero])
     } yield hx // hexes with heroes
-    heroes
+    val tuple = heroes
       .map((heroHex: Hex) => {
         map.grid.hexes
           .find(h => h.contents.contains(entity)) // optional hex with the enemy
@@ -53,5 +53,6 @@ class BerserkAI(entity: Creature) {
             }
       })
       .minBy(_._3)
+    (tuple._1, tuple._2)
   }
 }
