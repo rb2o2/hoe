@@ -17,6 +17,7 @@ each of which must be described in @CHUNKS.md and must be commited after decompo
 - Keep each class/trait/enum/object... in separate file, except for class and its companion object residing alongside in the same .scala file
 - Respect SOLID principles when laying out program structure
 - Start with simple but fundamental solution, then try to tweak and improve to meet requirements
+- Also, consult with @BestPractices.md for specific coding best practices
 
 # Task workflow
 @ACTIVE_TASKS.md is a read-only file and contains tasks which you should precisely execute. Example file structure:
