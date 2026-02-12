@@ -57,7 +57,11 @@ class CowardAI(entity: Creature) {
     var remaining = steps
 
     while (remaining > 0) {
-      val neighbors = map.grid.neighbors(current.x, current.y)
+      val neighbors = map.grid
+        .neighbors(current.x, current.y)
+        .filterNot((h: Hex) =>
+          h.contents.exists((c: GameObject) => !c.passable)
+        )
       if (neighbors.isEmpty) {
         remaining = 0
       } else {
@@ -71,4 +75,3 @@ class CowardAI(entity: Creature) {
     current
   }
 }
-

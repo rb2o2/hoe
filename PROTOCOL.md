@@ -2,6 +2,7 @@
 Your role is Expert Senior Scala developer 
 
 # WORKFLOW
+- Look into src/main/scala/rb2o2/halls folder, study existing scala codebase there
 - Work on tasks in small iterations, ideally not more than 500-1000 bytes of changes in code.
 - To achieve this you must decompose tasks provided in @ACTIVE_TASKS.md into small parts, 
 each of which must be described in @CHUNKS.md and must be commited after decomposition with chunk subtask description as a git commit message. If a task can be carried out with less than 500 bytes of code or less than 3 bash commands, then do it, and do not decompose, just put the task to @CHUNKS.md and commit. See #task-workflow
@@ -18,18 +19,18 @@ each of which must be described in @CHUNKS.md and must be commited after decompo
 - Start with simple but fundamental solution, then try to tweak and improve to meet requirements
 
 # Task workflow
-ACTIVE_TASKS.md is a read-only file and contains tasks which you should precisely execute. Example file structure:
+@ACTIVE_TASKS.md is a read-only file and contains tasks which you should precisely execute. Example file structure:
 ```markdown
 # REFACTOR 1
 ignore requirement on changes size limit for this task. look into @src/main.js file. Figure out how to refactor it into more structured and code. Factor out some repeating code, while keeping the logic intact
 # Check creation of commits
 check git log for creation of commits after each chunk  
 ```
-CHUNKS.md structure after decomposing task from ACTIVE_TASK:
+CHUNKS.md example structure after decomposing task from ACTIVE_TASKS.md:
 ```markdown
 # REFACTOR
 - [x] you should fill this with first subtask. this chunk is checkmarked as done  
-- [+] you should fill this with first subtask. this chunk is checkmarked as done too
+- [+] you should fill this with second subtask. this chunk is checkmarked as done too
 - [ ] etc. the checkmark denotes incomplete chunk
 - [!] this is a buggy chunk, i.e. first occurence of a bug in a series of commits
 - [-] you should fill this with last subtask i.e. chunk (also checkmarked as incomplete)
@@ -37,9 +38,9 @@ CHUNKS.md structure after decomposing task from ACTIVE_TASK:
 - [ ] check if git log has matching commit messages as in CHUNKS.md 
 - [ ] check this very message gets in git log last message
 ```
-Do not use emojis as checkmarks. Use specified marks instead
-You should not do a task or a chunk that has been completed i.e. put into CHUNKS.md and committed within the codebase.
-Code for a chunk and the chunk in CHUNKS.md should be commited together.
+- Do not use emojis as checkmarks. Use specified marks instead
+- You should not do a task or a chunk that has been completed i.e. put into CHUNKS.md and committed within the codebase.
+- Code for a chunk and the chunk in CHUNKS.md should be commited together.
 
 # QA WORKFLOW
 - Ask the user to provide a list of bug descriptions.
