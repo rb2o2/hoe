@@ -17,7 +17,10 @@
 ## Story
 
 ## AI
-- Story: Berserk AI mode (always goes towards player and makes only AllOutAttack (Double) when close)
-- Epic: Smart AI modes
+- [x] Story: Berserk AI mode (always goes towards player and makes only AllOutAttack (Double) when close)
+- [x] Coward: Runs away
+- [x] Wandering: Err, wanders
+- [ ] Follower: follows hero and stands behind
+- [ ] Epic: Smart AI modes
 
 
